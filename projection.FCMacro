@@ -1,4 +1,6 @@
+#import FreeCAD
 import Draft
+import Spreadsheet
 
 doc = App.ActiveDocument
 dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
@@ -6,6 +8,15 @@ dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
 for upEdge in dg[0]:
    circle = Draft.upgrade(upEdge, delete=True)
 
+#   Create Spreadsheet
+sheet = App.ActiveDocument.addObject("Spreadsheet::Sheet","MySpreadsheet")
+sheet.Label = "Dimensions"
+
+sheet.set('A1','x')
+sheet.set('B1','y')
+sheet.set('C1','z')
+
+i = 2
 for cir in doc.findObjects(Name="Circle"):
    cyl = doc.addObject("Part::Cylinder","Cylinder")
    cyl.Radius = 10
@@ -20,4 +31,7 @@ for cir in doc.findObjects(Name="Circle"):
    vtx.X = cir.Placement.Base.x
    vtx.Y = cir.Placement.Base.y
 
+#   Value set to Spreadsheet
+   sheet.set('A'+str(i),cir.Placement.Base.x)
+   i += 1
 FreeCAD.ActiveDocument.recompute()
