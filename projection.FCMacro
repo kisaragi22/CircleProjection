@@ -1,0 +1,23 @@
+import Draft
+
+doc = App.ActiveDocument
+dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
+
+for upEdge in dg[0]:
+   circle = Draft.upgrade(upEdge, delete=True)
+
+for cir in doc.findObjects(Name="Circle"):
+   cyl = doc.addObject("Part::Cylinder","Cylinder")
+   cyl.Radius = 10
+   cyl.Height = 200
+   cyl.Placement.Base.x = cir.Placement.Base.x
+   cyl.Placement.Base.y = cir.Placement.Base.y
+
+#   cir.Placement.Base.z = 0
+#   cir.Placement.Base
+
+   vtx = doc.addObject("Part::Vertex","Vertex")
+   vtx.X = cir.Placement.Base.x
+   vtx.Y = cir.Placement.Base.y
+
+FreeCAD.ActiveDocument.recompute()
