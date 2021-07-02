@@ -1,6 +1,7 @@
 #import FreeCAD
 import Draft
 import Spreadsheet
+import math
 
 doc = App.ActiveDocument
 dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
@@ -9,20 +10,45 @@ for upEdge in dg[0]:
    circle = Draft.upgrade(upEdge, delete=True)
 
 #   Create Spreadsheet
-sheet = App.ActiveDocument.addObject("Spreadsheet::Sheet","MySpreadsheet")
+sheet = App.ActiveDocument.addObject("Spreadsheet::Sheet","HoleDimensions")
 sheet.Label = "Dimensions"
 
 sheet.set('A1','x')
 sheet.set('B1','y')
 sheet.set('C1','z')
+sheet.set('D1','D1')
+sheet.set('E1','D2')
+sheet.set('F1','H')
+sheet.set('G1','Type')
+
 
 i = 2
 for cir in doc.findObjects(Name="Circle"):
-   cyl = doc.addObject("Part::Cylinder","Cylinder")
-   cyl.Radius = 10
-   cyl.Height = 200
+   zoffset = -5
+   H = 25
+   d = cir.Radius * 2
+   if d > round(d)-0.1 and d < round(d)+0.1:
+      Type = "Dowel"
+      D1 = round(d)
+      D2 = D1 + 1
+   else:
+      Type = "Bolt"
+      nominal = math.floor(cir.Radius) * 2
+      D1 = nominal + 2
+      D2 = nominal * 1.5 + 2
+
+   cyl = doc.addObject("Part::Cylinder","Cylinder1")
+   cyl.Radius = D1 / 2
+   cyl.Height = 200 + zoffset
    cyl.Placement.Base.x = cir.Placement.Base.x
    cyl.Placement.Base.y = cir.Placement.Base.y
+   cyl.Placement.Base.z = zoffset
+   cyl2 = doc.addObject("Part::Cylinder","Cylinder2")
+   cyl2.Radius = D2 / 2
+   cyl2.Height = cyl.Height - H
+   cyl2.Placement.Base.x = cir.Placement.Base.x
+   cyl2.Placement.Base.y = cir.Placement.Base.y
+   cyl2.Placement.Base.z = H
 
 #   cir.Placement.Base.z = 0
 #   cir.Placement.Base
@@ -31,7 +57,15 @@ for cir in doc.findObjects(Name="Circle"):
    vtx.X = cir.Placement.Base.x
    vtx.Y = cir.Placement.Base.y
 
+
 #   Value set to Spreadsheet
-   sheet.set('A'+str(i),cir.Placement.Base.x)
+   sheet.set('A'+str(i),str(cir.Placement.Base.x))
+   sheet.set('B'+str(i),str(cir.Placement.Base.y))
+   sheet.set('C'+str(i),str(cir.Placement.Base.z))
+   sheet.set('D'+str(i),str(D1))
+   sheet.set('E'+str(i),f'{D2}')
+   sheet.set('F'+str(i),f'{H}')
+   sheet.set('G'+str(i),Type)
+
    i += 1
 FreeCAD.ActiveDocument.recompute()
