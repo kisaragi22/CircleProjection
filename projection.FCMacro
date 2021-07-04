@@ -3,6 +3,24 @@ import Draft
 import Spreadsheet
 import math
 
+def setObjColor(obj, color):
+	# set color for all faces of selected object
+	colorlist=[]
+	for i in range(len(obj.Shape.Faces)):
+		colorlist.append(color)
+	print('[*] Object contains %d faces'%(len(colorlist),))
+	obj.ViewObject.DiffuseColor = colorlist
+
+#ザグリ穴用色変更関数
+def setObjColor2(obj, color, color2):
+	# set color for all faces of selected object
+	colorlist=[]
+	for i in range(len(obj.Shape.Faces)):
+		colorlist.append(color)
+	print('[*] Object contains %d faces'%(len(colorlist),))
+	colorlist[2]=color2
+	obj.ViewObject.DiffuseColor = colorlist
+
 doc = App.ActiveDocument
 dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
 
@@ -57,6 +75,14 @@ for cir in doc.findObjects(Name="Circle"):
    vtx.X = cir.Placement.Base.x
    vtx.Y = cir.Placement.Base.y
 
+#   set Face Color
+
+   if (Type == "Dowel"):
+      setObjColor(cyl, (1.0 ,1.0 ,0.0))
+      setObjColor(cyl2, (0.0 ,0.0 ,1.0))
+   elif (Type == "Bolt"):
+      setObjColor(cyl, (0.0 ,0.0 ,1.0))
+      setObjColor2(cyl2, (0.0 ,0.0 ,1.0), (1.0, 0.0, 0.0))
 
 #   Value set to Spreadsheet
    sheet.set('A'+str(i),str(cir.Placement.Base.x))
@@ -67,5 +93,14 @@ for cir in doc.findObjects(Name="Circle"):
    sheet.set('F'+str(i),f'{H}')
    sheet.set('G'+str(i),Type)
 
+#   set Alias
+   sheet.setAlias('A' + str(i),'x' + str(i))
+
+#   Object Property Link to Spreadsheet
+
+   cyl.Placement.Base.x = cir.Placement.Base.x
+
+
    i += 1
 FreeCAD.ActiveDocument.recompute()
+
