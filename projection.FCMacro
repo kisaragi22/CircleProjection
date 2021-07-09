@@ -1,3 +1,4 @@
+
 #import FreeCAD
 import Draft
 import Spreadsheet
@@ -42,9 +43,11 @@ sheet.set('G1','Type')
 
 i = 2
 for cir in doc.findObjects(Name="Circle"):
-   zoffset = -5
-   H = 25
+   zoffset = -5		#extension length for bottom side
+   H = 25			#Zaguri bottom hight
    d = cir.Radius * 2
+
+#   detect Hole Type
    if d > round(d)-0.1 and d < round(d)+0.1:
       Type = "Dowel"
       D1 = round(d)
@@ -55,12 +58,14 @@ for cir in doc.findObjects(Name="Circle"):
       D1 = nominal + 2
       D2 = nominal * 1.5 + 2
 
+#   create Cylinder
    cyl = doc.addObject("Part::Cylinder","Cylinder1")
    cyl.Radius = D1 / 2
    cyl.Height = 200 + zoffset
    cyl.Placement.Base.x = cir.Placement.Base.x
    cyl.Placement.Base.y = cir.Placement.Base.y
    cyl.Placement.Base.z = zoffset
+
    cyl2 = doc.addObject("Part::Cylinder","Cylinder2")
    cyl2.Radius = D2 / 2
    cyl2.Height = cyl.Height - H
@@ -71,12 +76,12 @@ for cir in doc.findObjects(Name="Circle"):
 #   cir.Placement.Base.z = 0
 #   cir.Placement.Base
 
+#   create Circle Center Point
    vtx = doc.addObject("Part::Vertex","Vertex")
    vtx.X = cir.Placement.Base.x
    vtx.Y = cir.Placement.Base.y
 
 #   set Face Color
-
    if (Type == "Dowel"):
       setObjColor(cyl, (1.0 ,1.0 ,0.0))
       setObjColor(cyl2, (0.0 ,0.0 ,1.0))
