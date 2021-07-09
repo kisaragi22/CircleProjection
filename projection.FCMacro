@@ -25,23 +25,21 @@ def setObjColor2(obj, color, color2):
 doc = App.ActiveDocument
 dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
 
-for upEdge in dg[0]:
-   circle = Draft.upgrade(upEdge, delete=True)
-
 #   Create Spreadsheet
 sheet = App.ActiveDocument.addObject("Spreadsheet::Sheet","HoleDimensions")
 sheet.Label = "Dimensions"
 
-sheet.set('A1','x')
-sheet.set('B1','y')
-sheet.set('C1','z')
-sheet.set('D1','D1')
-sheet.set('E1','D2')
-sheet.set('F1','H')
-sheet.set('G1','Type')
+index = [chr(i) for i in range(65,65+26)]
+value = ('Name','x','y','z','D1','D2','H','Type')
 
+for i, val in enumerate(value):
+   sheet.set(index[i] + '1', val)
 
-i = 2
+#   upgrade Edge
+for upEdge in dg[0]:
+   circle = Draft.upgrade(upEdge, delete=True)
+
+i = 0
 for cir in doc.findObjects(Name="Circle"):
    zoffset = -5		#extension length for bottom side
    H = 25			#Zaguri bottom hight
@@ -59,7 +57,7 @@ for cir in doc.findObjects(Name="Circle"):
       D2 = nominal * 1.5 + 2
 
 #   create Cylinder
-   cyl = doc.addObject("Part::Cylinder","Cylinder1")
+   cyl = doc.addObject("Part::Cylinder","Cylinder1_" + str(i).zfill(3))
    cyl.Radius = D1 / 2
    cyl.Height = 200 + zoffset
    cyl.Placement.Base.x = cir.Placement.Base.x
@@ -67,7 +65,7 @@ for cir in doc.findObjects(Name="Circle"):
    cyl.Placement.Base.z = zoffset
 #   create Chamfer
    chamfer = 1
-   cone1 = doc.addObject("Part::Cone","Cone1")
+   cone1 = doc.addObject("Part::Cone","Cone1_" + str(i).zfill(3))
    cone1.Height = 5
    cone1.Radius1 = cyl.Radius
    cone1.Radius2 = cone1.Radius1 + cone1.Height
@@ -77,19 +75,18 @@ for cir in doc.findObjects(Name="Circle"):
    cone1.Placement.Rotation.Axis = (0.0, 1.0, 0.0)
    cone1.Placement.Rotation.Angle = 180 / 180 * math.pi	#deg-rad trans
 
-   cyl2 = doc.addObject("Part::Cylinder","Cylinder2")
+   cyl2 = doc.addObject("Part::Cylinder","Cylinder2_" + str(i).zfill(3))
    cyl2.Radius = D2 / 2
    cyl2.Height = cyl.Height - H
    cyl2.Placement.Base.x = cir.Placement.Base.x
    cyl2.Placement.Base.y = cir.Placement.Base.y
    cyl2.Placement.Base.z = H
 
-
 #   cir.Placement.Base.z = 0
 #   cir.Placement.Base
 
 #   create Circle Center Point
-   vtx = doc.addObject("Part::Vertex","Vertex")
+   vtx = doc.addObject("Part::Vertex","Vertex_" + str(i).zfill(3))
    vtx.X = cir.Placement.Base.x
    vtx.Y = cir.Placement.Base.y
 
@@ -104,21 +101,22 @@ for cir in doc.findObjects(Name="Circle"):
    setObjColor(cone1, (0.0 ,0.0 ,1.0))
 
 #   Value set to Spreadsheet
-   sheet.set('A'+str(i),str(cir.Placement.Base.x))
-   sheet.set('B'+str(i),str(cir.Placement.Base.y))
-   sheet.set('C'+str(i),str(cir.Placement.Base.z))
-   sheet.set('D'+str(i),str(D1))
-   sheet.set('E'+str(i),f'{D2}')
-   sheet.set('F'+str(i),f'{H}')
-   sheet.set('G'+str(i),Type)
 
-#   set Alias
-   sheet.setAlias('A' + str(i),'x' + str(i))
+   index = [chr(j) for j in range(65,65+26)]
+   value = [(str(cir.Label), 'Lbl_'), \
+            (str(cir.Placement.Base.x), 'DimX_'), \
+            (str(cir.Placement.Base.y), 'DimY_'),\
+            (str(cir.Placement.Base.z), 'DimZ_'), \
+            (str(D1), 'D1_'), \
+            (f'{D2}', 'D2_'), \
+            (f'{H}', 'H_'), \
+            (Type, 'Type_')]
+
+   for j, val in enumerate(value):
+      sheet.set(index[j] + str(i+2), val[0])
+      sheet.setAlias(index[j] + str(i+2), val[1] + str(i).zfill(3))
 
 #   Object Property Link to Spreadsheet
-
-   cyl.Placement.Base.x = cir.Placement.Base.x
-
 
    i += 1
 FreeCAD.ActiveDocument.recompute()
