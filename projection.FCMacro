@@ -118,6 +118,10 @@ for cir in doc.findObjects(Name="Circle"):
 
 #   Object Property Link to Spreadsheet
 
+   cyl.setExpression('Radius','0.5 * HoleDimensions.D1_' + str(i).zfill(3))
+   cyl2.setExpression('Radius','0.5 * HoleDimensions.D2_' + str(i).zfill(3))
+   cyl2.setExpression('Placement.Base.z','HoleDimensions.H_' + str(i).zfill(3))
+
    i += 1
 FreeCAD.ActiveDocument.recompute()
 
