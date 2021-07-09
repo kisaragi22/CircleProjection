@@ -65,6 +65,17 @@ for cir in doc.findObjects(Name="Circle"):
    cyl.Placement.Base.x = cir.Placement.Base.x
    cyl.Placement.Base.y = cir.Placement.Base.y
    cyl.Placement.Base.z = zoffset
+#   create Chamfer
+   chamfer = 1
+   cone1 = doc.addObject("Part::Cone","Cone1")
+   cone1.Height = 5
+   cone1.Radius1 = cyl.Radius
+   cone1.Radius2 = cone1.Radius1 + cone1.Height
+   cone1.Placement.Base.x = cyl.Placement.Base.x
+   cone1.Placement.Base.y = cyl.Placement.Base.y
+   cone1.Placement.Base.z = chamfer
+   cone1.Placement.Rotation.Axis = (0.0, 1.0, 0.0)
+   cone1.Placement.Rotation.Angle = 180 / 180 * math.pi	#deg-rad trans
 
    cyl2 = doc.addObject("Part::Cylinder","Cylinder2")
    cyl2.Radius = D2 / 2
@@ -72,6 +83,7 @@ for cir in doc.findObjects(Name="Circle"):
    cyl2.Placement.Base.x = cir.Placement.Base.x
    cyl2.Placement.Base.y = cir.Placement.Base.y
    cyl2.Placement.Base.z = H
+
 
 #   cir.Placement.Base.z = 0
 #   cir.Placement.Base
@@ -88,6 +100,8 @@ for cir in doc.findObjects(Name="Circle"):
    elif (Type == "Bolt"):
       setObjColor(cyl, (0.0 ,0.0 ,1.0))
       setObjColor2(cyl2, (0.0 ,0.0 ,1.0), (1.0, 0.0, 0.0))
+
+   setObjColor(cone1, (0.0 ,0.0 ,1.0))
 
 #   Value set to Spreadsheet
    sheet.set('A'+str(i),str(cir.Placement.Base.x))
