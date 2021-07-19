@@ -36,7 +36,7 @@ sheet = App.ActiveDocument.addObject("Spreadsheet::Sheet","HoleDimensions")
 sheet.Label = "Dimensions"
 
 index = [chr(i) for i in range(65,65+26)]
-value = ('Name','x','y','z','D1','D2','H','Type')
+value = ('Name','x','y','z','d0','D1','D2','H','Type')
 
 for i, val in enumerate(value):
    sheet.set(index[i] + '1', val)
@@ -114,6 +114,7 @@ for cir in doc.findObjects(Name="Circle"):
             (str(cir.Placement.Base.x), 'DimX_'), \
             (str(cir.Placement.Base.y), 'DimY_'),\
             (str(cir.Placement.Base.z), 'DimZ_'), \
+            (str(cir.Radius * 2), 'D0_'), \
             (str(D1), 'D1_'), \
             (f'{D2}', 'D2_'), \
             (f'{H}', 'H_'), \
