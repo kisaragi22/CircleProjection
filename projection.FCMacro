@@ -4,6 +4,12 @@ import Draft
 import Spreadsheet
 import math
 
+ZH = 25 		#Zaguri bottom hight
+DH = 25 		#Dowel deffective hight
+ZOFFSET = -5 	#extension length for bottom side
+CYL_HEIGHT = 200
+CHAMFER = 1
+
 def setObjColor(obj, color):
 	# set color for all faces of selected object
 	colorlist=[]
@@ -41,8 +47,7 @@ for upEdge in dg[0]:
 
 i = 0
 for cir in doc.findObjects(Name="Circle"):
-   zoffset = -5		#extension length for bottom side
-   H = 25			#Zaguri bottom hight
+   zoffset = ZOFFSET		#extension length for bottom side
    d = cir.Radius * 2
 
 #   detect Hole Type
@@ -50,21 +55,23 @@ for cir in doc.findObjects(Name="Circle"):
       Type = "Dowel"
       D1 = round(d)
       D2 = D1 + 1
+      H = ZH			#Zaguri bottom hight
    else:
       Type = "Bolt"
       nominal = math.floor(cir.Radius) * 2
       D1 = nominal + 2
       D2 = nominal * 1.5 + 2
+      H = DH			#Dowel effective hight
 
 #   create Cylinder
    cyl = doc.addObject("Part::Cylinder","Cylinder1_" + str(i).zfill(3))
    cyl.Radius = D1 / 2
-   cyl.Height = 200 + zoffset
+   cyl.Height = CYL_HEIGHT + zoffset
    cyl.Placement.Base.x = cir.Placement.Base.x
    cyl.Placement.Base.y = cir.Placement.Base.y
    cyl.Placement.Base.z = zoffset
 #   create Chamfer
-   chamfer = 1
+   chamfer = CHAMFER
    cone1 = doc.addObject("Part::Cone","Cone1_" + str(i).zfill(3))
    cone1.Height = 5
    cone1.Radius1 = cyl.Radius
@@ -121,6 +128,10 @@ for cir in doc.findObjects(Name="Circle"):
    cyl.setExpression('Radius','0.5 * HoleDimensions.D1_' + str(i).zfill(3))
    cyl2.setExpression('Radius','0.5 * HoleDimensions.D2_' + str(i).zfill(3))
    cyl2.setExpression('Placement.Base.z','HoleDimensions.H_' + str(i).zfill(3))
+   cone1.setExpression('Radius1', cyl.Label + '.Radius')
+   cone1.setExpression('Radius2', cone1.Label + '.Radius1 + ' + cone1.Label + '.Height')
+ #  cone2.setExpression('Radius1','cyl.Radius')
+ #  cone2.setExpression('Radius2','cone1.Radius1 + cone1.Height')
 
    i += 1
 FreeCAD.ActiveDocument.recompute()
