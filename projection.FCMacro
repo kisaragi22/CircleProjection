@@ -66,7 +66,7 @@ for cir in doc.findObjects(Name="Circle"):
 #   create Cylinder
    cyl = doc.addObject("Part::Cylinder","Cylinder1_" + str(i).zfill(3))
    cyl.Radius = D1 / 2
-   cyl.Height = CYL_HEIGHT + zoffset
+   cyl.Height = CYL_HEIGHT - zoffset
    cyl.Placement.Base.x = cir.Placement.Base.x
    cyl.Placement.Base.y = cir.Placement.Base.y
    cyl.Placement.Base.z = zoffset
@@ -84,7 +84,7 @@ for cir in doc.findObjects(Name="Circle"):
 
    cyl2 = doc.addObject("Part::Cylinder","Cylinder2_" + str(i).zfill(3))
    cyl2.Radius = D2 / 2
-   cyl2.Height = cyl.Height - H
+   cyl2.Height = CYL_HEIGHT - H
    cyl2.Placement.Base.x = cir.Placement.Base.x
    cyl2.Placement.Base.y = cir.Placement.Base.y
    cyl2.Placement.Base.z = H
@@ -106,6 +106,18 @@ for cir in doc.findObjects(Name="Circle"):
       setObjColor2(cyl2, (0.0 ,0.0 ,1.0), (1.0, 0.0, 0.0))
 
    setObjColor(cone1, (0.0 ,0.0 ,1.0))
+
+#   add Annotation
+   an = doc.addObject("App::Annotation","Text_" + str(i).zfill(3))
+   an.LabelText = str(cir.Label)
+   an.Position.x = cir.Placement.Base.x
+   an.Position.y = cir.Placement.Base.y
+   an.Position.z = 0.0
+   an.ViewObject.FontSize = 20.0
+
+#   add Group
+   gp = doc.addObject("App::DocumentObjectGroup", "Group" + str(i).zfill(3))
+   gp.addObjects([cir, cyl, cyl2, cone1, vtx, an])
 
 #   Value set to Spreadsheet
 
