@@ -1,0 +1,12 @@
+def setObjColor2(obj, color, color2):
+	# set color for all faces of selected object
+	colorlist=[]
+	for i in range(len(obj.Shape.Faces)):
+		colorlist.append(color)
+	print('[*] Object contains %d faces'%(len(colorlist),))
+	colorlist[2]=color2
+	obj.ViewObject.DiffuseColor = colorlist
+
+for f in Gui.Selection.getSelection():
+
+   setObjColor2(f, (0.0, 0.0, 1.0), (1.0, 0.0, 0.0))

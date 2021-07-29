@@ -1,0 +1,71 @@
+#import FreeCAD
+import Spreadsheet
+
+doc = App.ActiveDocument
+
+# create Spreadsheet
+sheet = doc.addObject("Spreadsheet::Sheet","BoxDimensions")
+sheet.Label = "Dimensions"
+
+index = [chr(i) for i in range(65,65+26)]
+value = ('Name','x','y','z')
+
+for i, val in enumerate(value):
+   sheet.set(index[i] + '1', val)
+
+# get Vtx coordinate
+
+i = 0
+
+for vtx in doc.findObjects(Type='Part::Feature')[0].Shape.Vertexes:
+   x = round(vtx.X, 2)
+   y = round(vtx.Y, 2)
+   z = round(vtx.Z, 2)
+
+# create lectangle Sketch
+   skt = doc.addObject('Sketcher::SketchObject', 'Sketch_' + str(i).zfill(3))
+   geoList = []
+   geoList.append(Part.LineSegment(App.Vector(0.0,0.0,0),App.Vector(x,0.0,0)))
+   geoList.append(Part.LineSegment(App.Vector(x,0.0,0),App.Vector(x,y,0)))
+   geoList.append(Part.LineSegment(App.Vector(x,y),App.Vector(0.0,y,0)))
+   geoList.append(Part.LineSegment(App.Vector(0.0,y,0),App.Vector(0.0,0.0,0)))
+   skt.addGeometry(geoList,False)
+   conList = []
+   conList.append(Sketcher.Constraint('Coincident',0,2,1,1))
+   conList.append(Sketcher.Constraint('Coincident',1,2,2,1))
+   conList.append(Sketcher.Constraint('Coincident',2,2,3,1))
+   conList.append(Sketcher.Constraint('Coincident',3,2,0,1))   
+   conList.append(Sketcher.Constraint('Horizontal',0))
+   conList.append(Sketcher.Constraint('Horizontal',2))
+   conList.append(Sketcher.Constraint('Vertical',1))
+   conList.append(Sketcher.Constraint('Vertical',3))
+   conList.append(Sketcher.Constraint('Coincident',0,1,-1,1))
+   conList.append(Sketcher.Constraint('DistanceX',0,1,0,2,x))
+   conList.append(Sketcher.Constraint('DistanceY',1,1,1,2,y))
+   skt.addConstraint(conList)
+
+# create Box
+   f = doc.addObject('Part::Extrusion','Extrude_' + str(i).zfill(3))
+   f.Base = skt
+   f.LengthFwd = z
+   f.Solid = True
+
+# set Value to Spreadsheet
+
+   index = [chr(j) for j in range(65,65+26)]
+   value = [(str(f.Label), 'Lbl_'), \
+            (str(x), 'DimX_'), \
+            (str(y), 'DimY_'),\
+            (str(z), 'DimZ_')]
+
+   for j, val in enumerate(value):
+      sheet.set(index[j] + str(i+2), val[0])
+      sheet.setAlias(index[j] + str(i+2), val[1] + str(i).zfill(3))
+
+# link Object Property to Spreadsheet
+
+   f.setExpression('LengthFwd','BoxDimensions.DimZ_' + str(i).zfill(3))
+
+   i += 1
+
+doc.recompute()
