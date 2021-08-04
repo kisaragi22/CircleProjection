@@ -10,4 +10,5 @@ SaveName, Filter = PySide.QtGui.QFileDialog.getSaveFileName(None, u"Export IGES 
 
 #ImportGui.export(FreeCAD.ActiveDocument.findObjects("App::Part"),SaveName)
 #ImportGui.export(FreeCAD.ActiveDocument.Objects,SaveName)
-ImportGui.export(FreeCAD.ActiveDocument.findObjects("Part::Feature"),SaveName)
+#ImportGui.export(FreeCAD.ActiveDocument.findObjects("Part::Feature"),SaveName)
+ImportGui.export(Gui.Selection.getSelection(),SaveName)
