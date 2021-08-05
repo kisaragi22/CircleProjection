@@ -4,29 +4,30 @@ import Draft
 import Spreadsheet
 import math
 
-ZH = 25 		#Zaguri bottom hight
-DH = 25 		#Dowel deffective hight
+Z0 = 0			#Bottm height
+ZH = 25 		#Zaguri bottom height
+DH = 25 		#Dowel deffective height
 ZOFFSET = -5 	#extension length for bottom side
 CYL_HEIGHT = 200
 CHAMFER = 1
 
 def setObjColor(obj, color):
-	# set color for all faces of selected object
-	colorlist=[]
-	for i in range(len(obj.Shape.Faces)):
-		colorlist.append(color)
-	print('[*] Object contains %d faces'%(len(colorlist),))
-	obj.ViewObject.DiffuseColor = colorlist
+    # set color for all faces of selected object
+    colorlist=[]
+    for i in range(len(obj.Shape.Faces)):
+        colorlist.append(color)
+    print('[*] Object contains %d faces'%(len(colorlist),))
+    obj.ViewObject.DiffuseColor = colorlist
 
 #ザグリ穴用色変更関数
 def setObjColor2(obj, color, color2):
-	# set color for all faces of selected object
-	colorlist=[]
-	for i in range(len(obj.Shape.Faces)):
-		colorlist.append(color)
-	print('[*] Object contains %d faces'%(len(colorlist),))
-	colorlist[2]=color2
-	obj.ViewObject.DiffuseColor = colorlist
+    # set color for all faces of selected object
+    colorlist=[]
+    for i in range(len(obj.Shape.Faces)):
+        colorlist.append(color)
+    print('[*] Object contains %d faces'%(len(colorlist),))
+    colorlist[2]=color2
+    obj.ViewObject.DiffuseColor = colorlist
 
 doc = App.ActiveDocument
 dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
@@ -36,7 +37,7 @@ sheet = App.ActiveDocument.addObject("Spreadsheet::Sheet","HoleDimensions")
 sheet.Label = "Dimensions"
 
 index = [chr(i) for i in range(65,65+26)]
-value = ('Name','x','y','z','d0','D1','D2','H','Type')
+value = ('Name','x','y','z','d0','D1','D2','z0','H','Type')
 
 for i, val in enumerate(value):
    sheet.set(index[i] + '1', val)
@@ -49,6 +50,7 @@ i = 0
 for cir in doc.findObjects(Name="Circle"):
    zoffset = ZOFFSET		#extension length for bottom side
    d = cir.Radius * 2
+   NUM = str(i).zfill(3)
 
 #   detect Hole Type
    if d > round(d)-0.1 and d < round(d)+0.1:
@@ -64,25 +66,25 @@ for cir in doc.findObjects(Name="Circle"):
       H = DH			#Dowel effective hight
 
 #   create Cylinder
-   cyl = doc.addObject("Part::Cylinder","Cylinder1_" + str(i).zfill(3))
+   cyl = doc.addObject("Part::Cylinder","Cylinder1_" + NUM)
    cyl.Radius = D1 / 2
    cyl.Height = CYL_HEIGHT - zoffset
    cyl.Placement.Base.x = cir.Placement.Base.x
    cyl.Placement.Base.y = cir.Placement.Base.y
-   cyl.Placement.Base.z = zoffset
+   cyl.Placement.Base.z = Z0 + zoffset
 #   create Chamfer
    chamfer = CHAMFER
-   cone1 = doc.addObject("Part::Cone","Cone1_" + str(i).zfill(3))
+   cone1 = doc.addObject("Part::Cone","Cone1_" + NUM)
    cone1.Height = 5
    cone1.Radius1 = cyl.Radius
    cone1.Radius2 = cone1.Radius1 + cone1.Height
    cone1.Placement.Base.x = cyl.Placement.Base.x
    cone1.Placement.Base.y = cyl.Placement.Base.y
-   cone1.Placement.Base.z = chamfer
+   cone1.Placement.Base.z = Z0 + chamfer
    cone1.Placement.Rotation.Axis = (0.0, 1.0, 0.0)
    cone1.Placement.Rotation.Angle = 180 / 180 * math.pi	#deg-rad trans
 
-   cyl2 = doc.addObject("Part::Cylinder","Cylinder2_" + str(i).zfill(3))
+   cyl2 = doc.addObject("Part::Cylinder","Cylinder2_" + NUM)
    cyl2.Radius = D2 / 2
    cyl2.Height = CYL_HEIGHT - H
    cyl2.Placement.Base.x = cir.Placement.Base.x
@@ -93,9 +95,10 @@ for cir in doc.findObjects(Name="Circle"):
 #   cir.Placement.Base
 
 #   create Circle Center Point
-   vtx = doc.addObject("Part::Vertex","Vertex_" + str(i).zfill(3))
+   vtx = doc.addObject("Part::Vertex","Vertex_" + NUM)
    vtx.X = cir.Placement.Base.x
    vtx.Y = cir.Placement.Base.y
+   vtx.Z = Z0
 
 #   set Face Color
    if (Type == "Dowel"):
@@ -108,15 +111,15 @@ for cir in doc.findObjects(Name="Circle"):
    setObjColor(cone1, (0.0 ,0.0 ,1.0))
 
 #   add Annotation
-   an = doc.addObject("App::Annotation","Text_" + str(i).zfill(3))
+   an = doc.addObject("App::Annotation","Text_" + NUM)
    an.LabelText = str(cir.Label)
    an.Position.x = cir.Placement.Base.x
    an.Position.y = cir.Placement.Base.y
-   an.Position.z = 0.0
+   an.Position.z = Z0
    an.ViewObject.FontSize = 20.0
 
 #   add Group
-   gp = doc.addObject("App::DocumentObjectGroup", "Group" + str(i).zfill(3))
+   gp = doc.addObject("App::DocumentObjectGroup", "Group" + NUM)
    gp.addObjects([cir, cyl, cyl2, cone1, vtx, an])
 
 #   Value set to Spreadsheet
@@ -129,20 +132,25 @@ for cir in doc.findObjects(Name="Circle"):
             (str(cir.Radius * 2), 'D0_'), \
             (str(D1), 'D1_'), \
             (f'{D2}', 'D2_'), \
+            (f'{Z0}', 'Z0_'), \
             (f'{H}', 'H_'), \
             (Type, 'Type_')]
 
    for j, val in enumerate(value):
       sheet.set(index[j] + str(i+2), val[0])
-      sheet.setAlias(index[j] + str(i+2), val[1] + str(i).zfill(3))
+      sheet.setAlias(index[j] + str(i+2), val[1] + NUM)
 
 #   Object Property Link to Spreadsheet
 
-   cyl.setExpression('Radius','0.5 * HoleDimensions.D1_' + str(i).zfill(3))
-   cyl2.setExpression('Radius','0.5 * HoleDimensions.D2_' + str(i).zfill(3))
-   cyl2.setExpression('Placement.Base.z','HoleDimensions.H_' + str(i).zfill(3))
+   cyl.setExpression('Radius','0.5 * HoleDimensions.D1_' + NUM)
+   cyl.setExpression('Placement.Base.z','HoleDimensions.Z0_' + NUM)
+   cyl2.setExpression('Radius','0.5 * HoleDimensions.D2_' + NUM)
+   cyl2.setExpression('Placement.Base.z','HoleDimensions.H_' + NUM + '+HoleDimensions.Z0_' + NUM)
    cone1.setExpression('Radius1', cyl.Label + '.Radius')
    cone1.setExpression('Radius2', cone1.Label + '.Radius1 + ' + cone1.Label + '.Height')
+   cone1.setExpression('Placement.Base.z','HoleDimensions.Z0_' + NUM)
+   vtx.setExpression('Placement.Base.z','HoleDimensions.Z0_' + NUM)
+   an.setExpression('Position.z','HoleDimensions.Z0_' + NUM)
  #  cone2.setExpression('Radius1','cyl.Radius')
  #  cone2.setExpression('Radius2','cone1.Radius1 + cone1.Height')
 
