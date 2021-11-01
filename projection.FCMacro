@@ -12,22 +12,22 @@ CYL_HEIGHT = 200
 CHAMFER = 1
 
 def setObjColor(obj, color):
-    # set color for all faces of selected object
-    colorlist=[]
-    for i in range(len(obj.Shape.Faces)):
-        colorlist.append(color)
-    print('[*] Object contains %d faces'%(len(colorlist),))
-    obj.ViewObject.DiffuseColor = colorlist
+	# set color for all faces of selected object
+	colorlist=[]
+	for i in range(len(obj.Shape.Faces)):
+		colorlist.append(color)
+	print('[*] Object contains %d faces'%(len(colorlist),))
+	obj.ViewObject.DiffuseColor = colorlist
 
 #ザグリ穴用色変更関数
 def setObjColor2(obj, color, color2):
-    # set color for all faces of selected object
-    colorlist=[]
-    for i in range(len(obj.Shape.Faces)):
-        colorlist.append(color)
-    print('[*] Object contains %d faces'%(len(colorlist),))
-    colorlist[2]=color2
-    obj.ViewObject.DiffuseColor = colorlist
+	# set color for all faces of selected object
+	colorlist=[]
+	for i in range(len(obj.Shape.Faces)):
+		colorlist.append(color)
+	print('[*] Object contains %d faces'%(len(colorlist),))
+	colorlist[2]=color2
+	obj.ViewObject.DiffuseColor = colorlist
 
 doc = App.ActiveDocument
 dg = Draft.downgrade(App.ActiveDocument.ActiveObject, delete=True)
@@ -141,6 +141,7 @@ for cir in doc.findObjects(Name="Circle"):
       sheet.setAlias(index[j] + str(i+2), val[1] + NUM)
 
 #   Object Property Link to Spreadsheet
+      
 
    cyl.setExpression('Radius','0.5 * HoleDimensions.D1_' + NUM)
    cyl.setExpression('Placement.Base.z','HoleDimensions.Z0_' + NUM)
@@ -148,7 +149,7 @@ for cir in doc.findObjects(Name="Circle"):
    cyl2.setExpression('Placement.Base.z','HoleDimensions.H_' + NUM + '+HoleDimensions.Z0_' + NUM)
    cone1.setExpression('Radius1', cyl.Label + '.Radius')
    cone1.setExpression('Radius2', cone1.Label + '.Radius1 + ' + cone1.Label + '.Height')
-   cone1.setExpression('Placement.Base.z','HoleDimensions.Z0_' + NUM)
+   cone1.setExpression('Placement.Base.z','HoleDimensions.Z0_' + NUM + '+' + str(chamfer) )
    vtx.setExpression('Placement.Base.z','HoleDimensions.Z0_' + NUM)
    an.setExpression('Position.z','HoleDimensions.Z0_' + NUM)
  #  cone2.setExpression('Radius1','cyl.Radius')
