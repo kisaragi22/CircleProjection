@@ -1,0 +1,14 @@
+# export IGES with colors
+# -*- coding: utf-8 -*-
+import ImportGui,PySide
+
+doc = FreeCAD.newDocument()
+FreeCAD.setActiveDocument(doc.Name)
+
+#path = FreeCAD.ConfigGet("AppHomePath")
+#path = FreeCAD.ConfigGet("UserHomePath")
+path = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/General").GetString("FileOpenSavePath")
+
+OpenName, Filter = PySide.QtGui.QFileDialog.getOpenFileName(None, u"Import IGES with color", path, "*.igs")
+
+ImportGui.insert(OpenName,doc.Name)
